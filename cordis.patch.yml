@@ -1,0 +1,24 @@
+# @dsh-external/dsh-ssh-control: Unified, non-intrusive SSH control and execution bundle.
+# Native tools (bash, fs, subprocess, etc.) and host services (directoryPicker) remain 100% untouched and native.
+
+- insert:
+    # Bare package row makes the dsh.client manifest discoverable for Web UI & settings.
+    - id: ssh-control-client-host
+      name: '@dsh-external/dsh-ssh-control'
+
+    - id: ssh-control-manager
+      name: '@dsh-external/dsh-ssh-control/manager'
+      inject: [settings]
+      config:
+        aliasRoot: !!js process.env.DSH_SSH_CONTROL_ALIAS_ROOT ?? dshHomePath('ssh-control/workspaces')
+
+    # Unified single compound tool for remote execution, file ops, status, and server discovery.
+    - id: ssh-control-tool
+      name: '@dsh-external/dsh-ssh-control/control-tool'
+      inject: [remoteSshManager, tools]
+
+    - id: ssh-control-web
+      name: '@dsh-external/dsh-ssh-control/web'
+      inject: [remoteSshManager]
+
+

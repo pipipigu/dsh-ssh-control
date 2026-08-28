@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 440" width="100%" height="100%">
+  <defs>
+    <linearGradient id="arch-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <linearGradient id="box-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+
+  <rect width="840" height="440" rx="14" fill="url(#arch-bg)" stroke="#334155" stroke-width="1.5"/>
+
+  <!-- Title -->
+  <text x="32" y="38" fill="#f8fafc" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="18" font-weight="700">DSH SSH 控制中枢架构拓扑 (Architecture Overview)</text>
+  <text x="32" y="58" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="12">100% 零侵入本地双轨 · 跨平台双模自适应 · 智能编码自愈 · SCP 流式传输</text>
+
+  <!-- Left: DSH Agent & Local World -->
+  <g transform="translate(32, 80)">
+    <rect width="240" height="320" rx="10" fill="url(#box-blue)" stroke="#3b82f6" stroke-width="1.5"/>
+    <rect x="0" y="0" width="240" height="36" rx="10" fill="#1e3a8a"/>
+    <text x="16" y="23" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="13" font-weight="700">本地开发世界 (Local World)</text>
+
+    <!-- Node 1: Native Tools -->
+    <rect x="14" y="52" width="212" height="60" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="1"/>
+    <text x="24" y="74" fill="#34d399" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="12" font-weight="600">DSH 原生工具链</text>
+    <text x="24" y="94" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">bash · fs · glob · grep (100% 原生)</text>
+
+    <!-- Node 2: Web GUI -->
+    <rect x="14" y="126" width="212" height="60" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+    <text x="24" y="148" fill="#e2e8f0" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="12" font-weight="600">DSH Web 设置与看板</text>
+    <text x="24" y="168" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">主机网格 · 状态探查 · 纯 SVG 图标</text>
+
+    <!-- Node 3: Local Filesystem -->
+    <rect x="14" y="200" width="212" height="100" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+    <text x="24" y="222" fill="#e2e8f0" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="12" font-weight="600">OpenSSH 配置中心</text>
+    <text x="24" y="242" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">~/.ssh/config 零配置自发现</text>
+    <text x="24" y="262" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">本地秘钥 / Key 免密认证</text>
+    <text x="24" y="282" fill="#60a5fa" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">无状态调用 · 零会话污染</text>
+  </g>
+
+  <!-- Middle: ssh_control Hub -->
+  <g transform="translate(300, 80)">
+    <rect width="240" height="320" rx="10" fill="url(#box-blue)" stroke="#8b5cf6" stroke-width="1.5"/>
+    <rect x="0" y="0" width="240" height="36" rx="10" fill="#5b21b6"/>
+    <text x="16" y="23" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="13" font-weight="700">SSH 控制中枢 (ssh_control)</text>
+
+    <!-- Capabilities -->
+    <g transform="translate(14, 50)">
+      <rect width="212" height="42" rx="6" fill="#0f172a" stroke="#475569" stroke-width="0.8"/>
+      <text x="12" y="25" fill="#c084fc" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600">exec · read · write · tail</text>
+      
+      <rect y="50" width="212" height="42" rx="6" fill="#0f172a" stroke="#475569" stroke-width="0.8"/>
+      <text x="12" y="75" fill="#c084fc" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600">upload · download (SCP 管道)</text>
+
+      <rect y="100" width="212" height="42" rx="6" fill="#0f172a" stroke="#475569" stroke-width="0.8"/>
+      <text x="12" y="125" fill="#c084fc" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600">docker · status (多挂载点水位)</text>
+
+      <rect y="150" width="212" height="50" rx="6" fill="#0f172a" stroke="#60a5fa" stroke-width="1"/>
+      <text x="12" y="170" fill="#93c5fd" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600">智能编码引擎 (Encoding Engine)</text>
+      <text x="12" y="188" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="10">UTF-8 优先 + GBK/CP936 智能降级</text>
+
+      <rect y="208" width="212" height="46" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1"/>
+      <text x="12" y="228" fill="#6ee7b7" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11" font-weight="600">多机并发调度 (Parallel Dispatch)</text>
+      <text x="12" y="244" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="10">Promise.all 并行管道 · 聚合输出</text>
+    </g>
+  </g>
+
+  <!-- Right: Remote World (Linux & Windows) -->
+  <g transform="translate(568, 80)">
+    <rect width="240" height="320" rx="10" fill="url(#box-blue)" stroke="#10b981" stroke-width="1.5"/>
+    <rect x="0" y="0" width="240" height="36" rx="10" fill="#065f46"/>
+    <text x="16" y="23" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="13" font-weight="700">远程执行世界 (Remote Hosts)</text>
+
+    <!-- Host 1: Linux / NAS -->
+    <rect x="14" y="52" width="212" height="116" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="1"/>
+    <text x="24" y="74" fill="#34d399" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="12" font-weight="700">Linux / NAS / 容器集群</text>
+    <text x="24" y="96" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">● 标准 POSIX Shell (bash/sh)</text>
+    <text x="24" y="116" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">● Docker 容器状态与日志</text>
+    <text x="24" y="136" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">● /volume1 数据盘多挂载点水位</text>
+    <text x="24" y="156" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">● 原生 sed / grep / tail 秒级过滤</text>
+
+    <!-- Host 2: Windows Server -->
+    <rect x="14" y="180" width="212" height="120" rx="6" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+    <text x="24" y="202" fill="#38bdf8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="12" font-weight="700">Windows 远程服务器</text>
+    <text x="24" y="224" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">● PowerShell / CMD 命令自适应</text>
+    <text x="24" y="244" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">● C: / D: / E: 盘符空间与水位</text>
+    <text x="24" y="264" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">● GBK / CP936 中文零乱码输出</text>
+    <text x="24" y="284" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="11">● Get-Content / Set-Location</text>
+  </g>
+
+  <!-- Connectors -->
+  <line x1="272" y1="240" x2="300" y2="240" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4"/>
+  <line x1="540" y1="240" x2="568" y2="240" stroke="#10b981" stroke-width="2" stroke-dasharray="4"/>
+</svg>

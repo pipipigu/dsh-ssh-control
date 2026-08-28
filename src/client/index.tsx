@@ -1,0 +1,84 @@
+/** Browser entry: locale registration, transparent openPath routing, and slots. */
+
+import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
+import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
+import type {} from '@deepseek-ai/dsh-client-ui-settings-plugins/client'
+import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
+import type {} from '@deepseek-ai/dsh-client-locale/client'
+import type {} from '@deepseek-ai/dsh-client-ui-slots'
+import { en, zh } from './locales.ts'
+import type { RemoteSshLocaleKey } from './locales.ts'
+import type { RemoteDirectoryListing } from './api.ts'
+import { RemoteSshPluginCard } from './RemoteSshPluginCard.tsx'
+import { RemoteSshSettings } from './RemoteSshSettings.tsx'
+import { RemoteWorkspaceFlow } from './RemoteWorkspaceFlow.tsx'
+import type { RemoteWorkspaceFlowInjected } from './RemoteWorkspaceFlow.tsx'
+import { installRemoteOpenPath } from './open-path.ts'
+import { REMOTE_BACKEND_CONTEXT_PATH, type RemoteBackendContext } from '../backend-context.ts'
+
+declare module '@deepseek-ai/dsh-client-ui-slots' {
+  interface LocaleNamespaceMap {
+    /** Remote SSH settings, picker, and file-opening copy. */
+    'settings.remote-ssh': RemoteSshLocaleKey
+  }
+}
+
+export const name = 'dsh-ssh-control-client'
+export const inject = ['slots', 'workspaces', 'sessions', 'locale']
+
+/** Register the localized settings, workspace flow, and transparent file opener. */
+export async function apply(ctx: ClientContext): Promise<void> {
+  const namespace = 'settings.remote-ssh'
+  ctx.effect(() => ctx.locale.register(namespace, { zh, en }), 'dsh-ssh-control: client copy')
+  if (await isRemoteBackendWindow()) return
+  const t = ctx.locale.bind(namespace) as RemoteWorkspaceFlowInjected['t']
+  installRemoteOpenPath(ctx)
+
+  ctx.slots.inject('settings.section', () => ctx.slots.register({
+    name: 'settings.section', id: 'remote-ssh', order: 16, label: () => t('nav'), inject: () => ({ t }),
+  }, RemoteSshSettings))
+
+  const injected = (): RemoteWorkspaceFlowInjected => ({
+    t,
+    listLocal: async (path?: string): Promise<RemoteDirectoryListing> => {
+      const listing = await ctx.workspaces.listDirectory(path)
+      const parent = listing.crumbs.length > 1 ? listing.crumbs[listing.crumbs.length - 2]?.path : undefined
+      return {
+        path: listing.path,
+        home: listing.home,
+        ...(parent === undefined ? {} : { parent }),
+        entries: listing.entries.map(entry => ({ name: entry.name, path: entry.path })),
+      }
+    },
+  })
+  ctx.slots.inject('conversation.hero.workspace.directoryFlow', () =>
+    ctx.slots.inject('sidebar.workspaces.directoryFlow', function* () {
+      // 这两个 directoryFlow 是 single slot；auto 的 client-ui-directory-picker-browse
+      // 已以 priority 0 注册。用更低优先级注册以 shadow 它（lowest renders），
+      // 让 RemoteWorkspaceFlow（远程 + 本地目录流）成为渲染赢家。
+      yield ctx.slots.register({ name: 'conversation.hero.workspace.directoryFlow', priority: -10, inject: injected }, RemoteWorkspaceFlow)
+      yield ctx.slots.register({ name: 'sidebar.workspaces.directoryFlow', priority: -10, inject: injected }, RemoteWorkspaceFlow)
+    }))
+
+  ctx.slots.inject('settings.plugin.item', () => ctx.slots.register({
+    name: 'settings.plugin.item', key: namespace, inject: () => ({ t }),
+  }, RemoteSshPluginCard))
+}
+
+/** Detect the gateway before registering any local-only Remote SSH chrome. */
+export async function isRemoteBackendWindow(
+  fetcher: typeof fetch = globalThis.fetch,
+): Promise<boolean> {
+  try {
+    const response = await fetcher(REMOTE_BACKEND_CONTEXT_PATH, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { accept: 'application/json' },
+    })
+    if (!response.ok) return false
+    const value = await response.json() as Partial<RemoteBackendContext>
+    return value.attached === true && value.transport === 'ssh'
+  } catch {
+    return false
+  }
+}
