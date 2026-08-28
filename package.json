@@ -1,0 +1,98 @@
+{
+  "name": "@dsh-external/dsh-ssh-control",
+  "version": "0.3.0",
+  "description": "Unified SSH control center for DeepSeek Harness with stateless multi-host dispatch, direct SSH pipes, and zero-intrusive local development.",
+  "author": "pipipigu",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "cordis",
+    "ssh",
+    "sftp",
+    "multi-host",
+    "remote-control",
+    "devops"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pipipigu/dsh-ssh-control.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pipipigu/dsh-ssh-control/issues"
+  },
+  "homepage": "https://github.com/pipipigu/dsh-ssh-control#readme",
+  "packageManager": "pnpm@11.21.0",
+  "type": "module",
+  "main": "lib/host.js",
+  "types": "lib/host.d.ts",
+  "scripts": {
+    "build": "pnpm run typecheck && tsdown",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.client.json",
+    "check": "pnpm run typecheck && pnpm run test && pnpm run build",
+    "prepublishOnly": "pnpm --config.minimum-release-age=0 run check"
+  },
+  "exports": {
+    ".": { "types": "./lib/host.d.ts", "default": "./lib/host.js" },
+    "./manager": { "types": "./lib/manager.d.ts", "default": "./lib/manager.js" },
+    "./control-tool": { "types": "./lib/control-tool.d.ts", "default": "./lib/control-tool.js" },
+    "./web": { "types": "./lib/web.d.ts", "default": "./lib/web.js" },
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": ["lib", "src", "scripts", "cordis.patch.yml", "README.md", "README.zh.md"],
+  "license": "Apache-2.0",
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-settings-plugins",
+        "@deepseek-ai/dsh-client-locale"
+      ],
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1-rc.1",
+    "@deepseek-ai/dsh-settings": "*",
+    "@deepseek-ai/dsh-host-webserver": "*",
+    "@deepseek-ai/dsh-client-runtime": "*",
+    "@deepseek-ai/dsh-client-locale": "*",
+    "@deepseek-ai/dsh-client-ui-slots": "*",
+    "@deepseek-ai/dsh-client-ui-settings-plugins": "*",
+    "@deepseek-ai/dsh-system-prompt": "*",
+    "@deepseek-ai/dsh-tools": "*",
+    "@deepseek-ai/schemastery": "^3.18.1-rc.1"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.1",
+    "@deepseek-ai/cordis-plugin-include": "1.0.6",
+    "@deepseek-ai/cordis-plugin-loader": "1.0.2",
+    "@deepseek-ai/dsh-settings": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-host-webserver": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-runtime": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-ui-settings": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-ui-settings-plugins": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-ui-slots": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-locale": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-system-prompt": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-tools": "0.1.0-rc.7",
+    "@deepseek-ai/schemastery": "3.18.1",
+    "@types/node": "^22.20.0",
+    "@types/react": "~18.3.1",
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^4.1.0",
+    "react": "^18.2.0",
+    "tsdown": "^0.22.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.8"
+  }
+}
