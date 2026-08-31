@@ -5,52 +5,117 @@ import type {} from '@deepseek-ai/dsh-host-webserver'
 import type { RemoteSshManager } from '../routing/manager.ts'
 import { appendSshHost, defaultSshConfigFiles } from '../ssh/config.ts'
 
-export const REMOTE_SSH_STATE_PATH = '/plugins/@dsh-external/dsh-ssh-control/state'
-export const REMOTE_SSH_PROBE_PATH = '/plugins/@dsh-external/dsh-ssh-control/probe'
-export const REMOTE_SSH_CONFIG_HOST_PATH = '/plugins/@dsh-external/dsh-ssh-control/ssh-config/host'
-export const REMOTE_SSH_SETTINGS_PATH = '/plugins/@dsh-external/dsh-ssh-control/settings'
+export const ROUTE_PREFIX = '/plugins/@dsh-external/dsh-ssh-control'
+export const REMOTE_SSH_STATE_PATH = `${ROUTE_PREFIX}/state`
+export const REMOTE_SSH_PROBE_PATH = `${ROUTE_PREFIX}/probe`
+export const REMOTE_SSH_CONFIG_HOST_PATH = `${ROUTE_PREFIX}/ssh-config/host`
+export const REMOTE_SSH_SETTINGS_PATH = `${ROUTE_PREFIX}/settings`
 
 export const name = 'dsh-ssh-control-web'
 export const inject = ['remoteSshManager']
 
 /** Activate the Web surface only in compositions that provide a Web host. */
 export function apply(ctx: Context): void {
-  ctx.inject(['webServer'], registerWebRoutes)
-}
+  ctx.inject(['webServer'], (child) => {
+    child.effect(() => {
+      const server = (child as any).webServer
+      if (!server || typeof server.register !== 'function') return () => {}
 
-/** Register same-origin catalog mutation and connection-probe endpoints. */
-function registerWebRoutes(ctx: Context): void {
-  route(ctx, REMOTE_SSH_STATE_PATH, 'GET', async (_req, res) => {
-    json(res, 200, await catalogState(ctx.remoteSshManager))
-  })
-  route(ctx, REMOTE_SSH_SETTINGS_PATH, 'POST', async (req, res) => {
-    const body = await readJson(req)
-    const sshConfigFile = optionalString(body, 'sshConfigFile')
-    await ctx.remoteSshManager.updateUserPreferences({
-      ...(sshConfigFile === undefined ? {} : { sshConfigFile }),
-    })
-    const snapshot = ctx.remoteSshManager.snapshot()
-    json(res, 200, {
-      sshConfigFile: snapshot.sshConfigFile,
-    })
-  })
-  route(ctx, REMOTE_SSH_PROBE_PATH, 'POST', async (req, res) => {
-    const body = await readJson(req)
-    const serverId = requiredString(body, 'id')
-    const servers = await ctx.remoteSshManager.listAvailableServers()
-    const server = servers.find(s => s.id === serverId || s.label === serverId || s.sshTarget === serverId)
-    if (!server) {
-      throw new Error(`Unknown server ID '${serverId}'`)
-    }
-    json(res, 200, await probeServer(server.sshTarget))
-  })
-  route(ctx, REMOTE_SSH_CONFIG_HOST_PATH, 'POST', async (req, res) => {
-    const body = await readJson(req)
-    const command = requiredString(body, 'command')
-    const configPath = requiredString(body, 'configPath')
-    await appendSshHost(configPath, command)
-    await ctx.remoteSshManager.refresh()
-    json(res, 200, { ok: true })
+      const disposers: Array<() => void> = []
+
+      // 1. /state
+      disposers.push(server.register({
+        kind: 'exact',
+        path: REMOTE_SSH_STATE_PATH,
+        handler: async (req: IncomingMessage, res: ServerResponse) => {
+          if (req.method !== 'GET') {
+            json(res, 405, { error: 'Method not allowed' })
+            return
+          }
+          try {
+            json(res, 200, await catalogState(child.remoteSshManager))
+          } catch (err: any) {
+            json(res, 500, { error: err?.message || String(err) })
+          }
+        },
+      }))
+
+      // 2. /settings
+      disposers.push(server.register({
+        kind: 'exact',
+        path: REMOTE_SSH_SETTINGS_PATH,
+        handler: async (req: IncomingMessage, res: ServerResponse) => {
+          if (req.method !== 'POST') {
+            json(res, 405, { error: 'Method not allowed' })
+            return
+          }
+          try {
+            const body = await readJson(req)
+            const sshConfigFile = optionalString(body, 'sshConfigFile')
+            await child.remoteSshManager.updateUserPreferences({
+              ...(sshConfigFile === undefined ? {} : { sshConfigFile }),
+            })
+            const snapshot = child.remoteSshManager.snapshot()
+            json(res, 200, {
+              sshConfigFile: snapshot.sshConfigFile,
+            })
+          } catch (err: any) {
+            json(res, 500, { error: err?.message || String(err) })
+          }
+        },
+      }))
+
+      // 3. /probe
+      disposers.push(server.register({
+        kind: 'exact',
+        path: REMOTE_SSH_PROBE_PATH,
+        handler: async (req: IncomingMessage, res: ServerResponse) => {
+          if (req.method !== 'POST') {
+            json(res, 405, { error: 'Method not allowed' })
+            return
+          }
+          try {
+            const body = await readJson(req)
+            const serverId = requiredString(body, 'id')
+            const servers = await child.remoteSshManager.listAvailableServers()
+            const target = servers.find((s: any) => s.id === serverId || s.label === serverId || s.sshTarget === serverId)
+            if (!target) {
+              json(res, 404, { error: `Unknown server ID '${serverId}'` })
+              return
+            }
+            json(res, 200, await probeServer(target.sshTarget))
+          } catch (err: any) {
+            json(res, 500, { error: err?.message || String(err) })
+          }
+        },
+      }))
+
+      // 4. /ssh-config/host
+      disposers.push(server.register({
+        kind: 'exact',
+        path: REMOTE_SSH_CONFIG_HOST_PATH,
+        handler: async (req: IncomingMessage, res: ServerResponse) => {
+          if (req.method !== 'POST') {
+            json(res, 405, { error: 'Method not allowed' })
+            return
+          }
+          try {
+            const body = await readJson(req)
+            const command = requiredString(body, 'command')
+            const configPath = requiredString(body, 'configPath')
+            await appendSshHost(configPath, command)
+            await child.remoteSshManager.refresh()
+            json(res, 200, { ok: true })
+          } catch (err: any) {
+            json(res, 500, { error: err?.message || String(err) })
+          }
+        },
+      }))
+
+      return () => {
+        for (const dispose of disposers) dispose()
+      }
+    }, 'dsh-ssh-control-web-routes')
   })
 }
 
@@ -114,10 +179,6 @@ async function probeServer(sshTarget: string): Promise<any> {
       resolve({ reachable: false, error: err.message })
     })
   })
-}
-
-function route(ctx: Context, path: string, method: string, handler: (req: IncomingMessage, res: ServerResponse) => Promise<void>): () => void {
-  return (ctx as any).webServer.route(path, method, handler)
 }
 
 function json(res: ServerResponse, status: number, body: unknown): void {
